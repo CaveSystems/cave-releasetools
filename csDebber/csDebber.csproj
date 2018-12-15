@@ -1,22 +1,34 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A92C7951-19DF-4EBD-A8EB-6C57B8B7C3BF}</ProjectGuid>
+    <TargetFramework>net471</TargetFramework>
     <OutputType>Exe</OutputType>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Version>1.0.2</Version>
+    <TargetFrameworkProfile />
+    <AssemblyVersion>1.0.2</AssemblyVersion>
+    <FileVersion>2018.1215.1125.1848</FileVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Cave.Tools.snk</AssemblyOriginatorKeyFile>
+    <SignManifests>true</SignManifests>
+    <ManifestCertificateThumbprint>4DC28D5A3DFC428FA11E2E921ECF4AF3C094F17F</ManifestCertificateThumbprint>
+    <ManifestTimestampUrl>http://timestamp.verisign.com/scripts/timstamp.dll</ManifestTimestampUrl>
+  </PropertyGroup>
+  <PropertyGroup>
     <RootNamespace>csDebber</RootNamespace>
     <AssemblyName>csDebber</AssemblyName>
-    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <ProductName>Debian Packager</ProductName>
+    <PackageId>csDebber</PackageId>
+    <ProductName>csDebber</ProductName>
     <PublisherName>CaveSystems GmbH, Andreas Rohleder</PublisherName>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Version>1.0.1</Version>
-    <TargetFrameworkProfile />
-    <AssemblyVersion>1.0.1.1</AssemblyVersion>
-    <FileVersion>2018.509.1318.825</FileVersion>
+    <Description>Builds debian packages for use with mono.</Description>
+    <Company>CaveSystems GmbH</Company>
+    <Copyright>(c) 2003-2018 Andreas Rohleder</Copyright>
+    <Authors>Andreas Rohleder</Authors>
+    <PackageLicenseUrl>https://www.gnu.org/licenses/agpl-3.0.en.html</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/CaveSystems/cave-releasetools</PackageProjectUrl>
+    <PackageIconUrl>https://www.cavesystems.de/favicon.ico</PackageIconUrl>
+    <PackageTags>CaveSystems Release Tools</PackageTags>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -38,21 +50,6 @@
     <WarningLevel>4</WarningLevel>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Cave.Tools.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignManifests>true</SignManifests>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestCertificateThumbprint>4DC28D5A3DFC428FA11E2E921ECF4AF3C094F17F</ManifestCertificateThumbprint>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestTimestampUrl>http://timestamp.verisign.com/scripts/timstamp.dll</ManifestTimestampUrl>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -64,36 +61,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="csDebber.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="Cave.Tools.snk" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Cave.AssemblyVersionInfo">
-      <Version>1.0.0-alpha-release-1</Version>
+      <Version>1.0.0</Version>
     </PackageReference>
     <PackageReference Include="Cave.Compression">
-      <Version>1.0.0-alpha-release-4</Version>
+      <Version>1.0.0</Version>
     </PackageReference>
     <PackageReference Include="Cave.Console">
-      <Version>1.0.0-alpha-release-1</Version>
+      <Version>1.0.0</Version>
     </PackageReference>
     <PackageReference Include="Cave.FileSystem">
-      <Version>1.0.0-alpha-release-1</Version>
+      <Version>1.0.0</Version>
     </PackageReference>
     <PackageReference Include="Cave.IO">
-      <Version>1.0.0-beta-release-1</Version>
+      <Version>1.0.0</Version>
     </PackageReference>
     <PackageReference Include="Cave.Settings">
-      <Version>1.0.0-alpha-release-1</Version>
+      <Version>1.0.1</Version>
     </PackageReference>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
 </Project>

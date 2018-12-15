@@ -1,7 +1,7 @@
 #define PACKAGE "cave-tools"
 #define NAME "CaveSystems Tools"
 #define COMPANY "CaveSystems GmbH"
-#define VERSION "1.0.1"
+#define VERSION "1.0.2"
 
 [Setup]
 AppId={#PACKAGE}
@@ -61,14 +61,8 @@ Source: "changes.txt"; DestDir: "{app}"; Flags: replacesameversion
 
 Source: "Obfuscar.Console.exe"; DestDir: "{app}"; Flags: replacesameversion
 
-Source: "..\csPrepareRelease\bin\Release\*.dll"; DestDir: "{app}"; Flags: replacesameversion
-Source: "..\csPrepareRelease\bin\Release\csPrepareRelease.exe*"; DestDir: "{app}"; Flags: replacesameversion
-Source: "..\csSign\bin\Release\csSign.exe*"; DestDir: "{app}"; Flags: replacesameversion
-Source: "..\csDebber\bin\Release\csDebber.exe*"; DestDir: "{app}"; Flags: replacesameversion
-Source: "..\csPublish\bin\Release\csPublish.exe*"; DestDir: "{app}"; Flags: replacesameversion
-Source: "..\csInnoSetup\bin\Release\csInnoSetup.exe*"; DestDir: "{app}"; Flags: replacesameversion
-Source: "..\csObfuscate\bin\Release\csObfuscate.exe*"; DestDir: "{app}"; Flags: replacesameversion
-Source: "..\csSymStore\bin\Release\csSymStore.exe*"; DestDir: "{app}"; Flags: replacesameversion
+Source: "bin\Release\net471\*.dll"; DestDir: "{app}"; Flags: replacesameversion
+Source: "bin\Release\net471\cs*.exe*"; DestDir: "{app}"; Flags: replacesameversion
 
 [Icons]
 Name: "{group}\{cm:UninstallProgram,{#NAME} {#VERSION}}"; Filename: "{uninstallexe}"

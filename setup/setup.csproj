@@ -1,19 +1,34 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4421084A-9769-4F69-860C-C045B2A55907}</ProjectGuid>
+    <TargetFramework>net471</TargetFramework>
     <OutputType>Library</OutputType>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Version>1.0.2</Version>
+    <TargetFrameworkProfile />
+    <AssemblyVersion>1.0.2</AssemblyVersion>
+    <FileVersion>2018.1215.1125.1848</FileVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Cave.Tools.snk</AssemblyOriginatorKeyFile>
+    <SignManifests>true</SignManifests>
+    <ManifestCertificateThumbprint>4DC28D5A3DFC428FA11E2E921ECF4AF3C094F17F</ManifestCertificateThumbprint>
+    <ManifestTimestampUrl>http://timestamp.verisign.com/scripts/timstamp.dll</ManifestTimestampUrl>
+  </PropertyGroup>
+  <PropertyGroup>
     <RootNamespace>setup</RootNamespace>
     <AssemblyName>setup</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.1</AssemblyVersion>
-    <FileVersion>2018.509.1318.825</FileVersion>
+    <PackageId>setup</PackageId>
+    <ProductName>setup</ProductName>
+    <PublisherName>CaveSystems GmbH, Andreas Rohleder</PublisherName>
+    <Description>CaveSystems Release Tools</Description>
+    <Company>CaveSystems GmbH</Company>
+    <Copyright>(c) 2003-2018 Andreas Rohleder</Copyright>
+    <Authors>Andreas Rohleder</Authors>
+    <PackageLicenseUrl>https://www.gnu.org/licenses/agpl-3.0.en.html</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/CaveSystems/cave-releasetools</PackageProjectUrl>
+    <PackageIconUrl>https://www.cavesystems.de/favicon.ico</PackageIconUrl>
+    <PackageTags>CaveSystems Release Tools</PackageTags>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -38,19 +53,62 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <None Include="license.rtf" />
+    <PackageReference Include="Cave.AssemblyVersionInfo" Version="1.0.0" />
+    <PackageReference Include="Cave.Collections" Version="1.0.1" />
+    <PackageReference Include="Cave.Compression" Version="1.0.0" />
+    <PackageReference Include="Cave.Console" Version="1.0.0" />
+    <PackageReference Include="Cave.FileSystem" Version="1.0.0" />
+    <PackageReference Include="Cave.IO" Version="1.0.0" />
+    <PackageReference Include="Cave.Net" Version="1.0.0" />
+    <PackageReference Include="Cave.Process" Version="1.0.0" />
+    <PackageReference Include="Cave.Settings" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="changes.txt" />
-    <Content Include="Setup.Release.iss" />
-    <Content Include="setup.ico" />
+    <ProjectReference Include="..\csDebber\csDebber.csproj">
+      <Project>{a92c7951-19df-4ebd-a8eb-6c57b8b7c3bf}</Project>
+      <Name>csDebber</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\csInnoSetup\csInnoSetup.csproj">
+      <Project>{2a7341af-0341-4aa3-82d5-3439f32a9b73}</Project>
+      <Name>csInnoSetup</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\csObfuscate\csObfuscate.csproj">
+      <Project>{9bb72c3a-35b8-49be-88c3-86f308c03c05}</Project>
+      <Name>csObfuscate</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\csPrepareRelease\csPrepareRelease.csproj">
+      <Project>{b6364f52-7b11-4187-841c-90768a582838}</Project>
+      <Name>csPrepareRelease</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\csPublish\csPublish.csproj">
+      <Project>{83b0c003-3f9e-4f7f-a986-6985790e60c3}</Project>
+      <Name>csPublish</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\csSign\csSign.csproj">
+      <Project>{46fc8704-a3c7-4033-9e15-f95002795515}</Project>
+      <Name>csSign</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\csSymStore\csSymStore.csproj">
+      <Project>{af7cf1b5-a8d9-4424-8a7e-46c5934fb511}</Project>
+      <Name>csSymStore</Name>
+    </ProjectReference>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
+  <ItemGroup>
+    <None Update="changes.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="license.rtf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Obfuscar.Console.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="setup.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>csInnoSetup --$(ConfigurationName) $(ProjectDir)Setup.$(ConfigurationName).iss</PostBuildEvent>
+    <ApplicationIcon />
   </PropertyGroup>
 </Project>

@@ -1,19 +1,15 @@
-﻿using Cave;
-using Cave.Console;
-using Cave.FileSystem;
-using Cave.IO;
-using Cave.Text;
-using Microsoft.Build.Evaluation;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Cave;
+using Cave.Console;
+using Cave.FileSystem;
+using Microsoft.Build.Evaluation;
 
 namespace csPrepareRelease
 {
@@ -35,60 +31,102 @@ namespace csPrepareRelease
 
         private void Init()
         {
-            var fileName = Path.GetFullPath(textBoxSolution.Text + ".ver");
+            string fileName = Path.GetFullPath(textBoxSolution.Text + ".ver");
             FileSystem.TouchFile(fileName);
             ini = new Ini(fileName);
             LoadVersonFile();
-            foreach (var p in Projects) listBoxProjects.Items.Add(p.DirectoryPath);
+            foreach (Project p in Projects)
+            {
+                listBoxProjects.Items.Add(p.DirectoryPath);
+            }
         }
 
-        string GetMeta(bool withCheckBox)
+        string GetMeta(bool withConfig, bool withDateTime, bool version2)
         {
-            var s = new string(comboBoxMeta.Text.Trim().ToLower().Where(c => (c >= 'a' && c <= 'z') || (c == '+') || (c == '-')).ToArray());
-            if (withCheckBox && checkBoxAddConfig.Checked)
+            string s = new string(comboBoxMeta.Text.Trim().ToLower().Where(c => (c >= 'a' && c <= 'z') || (c == '+') || (c == '-')).ToArray());
+            if (withConfig && checkBoxAddConfig.Checked)
             {
-                if (s.Length > 0) s += (s.LastIndexOf('+') > s.LastIndexOf('-')) ? '+' : '-';
+                if (s.Length > 0)
+                {
+                    s += (s.LastIndexOf('+') > s.LastIndexOf('-')) ? '+' : '-';
+                }
+
                 s += "$CONF$";
+            }
+            if (withDateTime && checkBoxAddDateTime.Checked)
+            {
+                if (version2)
+                {
+                    if (s.Length > 0)
+                    {
+                        s += ".";
+                    }
+                }
+                else
+                {
+                    if (s.Length > 0)
+                    {
+                        s += (s.LastIndexOf('+') > s.LastIndexOf('-')) ? '+' : '-';
+                    }
+                }
+                s += "$DATETIME$";
             }
             s = s.Replace("--", "-").Replace("++", "+");
             return s;
         }
 
+        [Flags]
         enum VFlags
         {
-            WithConfig = 1,
+            MetaWithConfig = 1,
             UpdateIni = 2,
             Version2 = 4,
+            MetaWithDateTime = 8,
         }
 
         string BuildVersionString(VFlags flags)
         {
-            bool withConfig = flags.HasFlag(VFlags.WithConfig);
+            bool metaWithConfig = flags.HasFlag(VFlags.MetaWithConfig);
+            bool metaWithDateTime = flags.HasFlag(VFlags.MetaWithDateTime);
             bool updateIni = flags.HasFlag(VFlags.UpdateIni);
             bool version2 = flags.HasFlag(VFlags.Version2);
 
-			if (withConfig && updateIni)
-			{
-				//ini should never contain configuration, so update without config
-				BuildVersionString(flags & ~VFlags.WithConfig);
-				updateIni = false;
-			}
+            if ((metaWithConfig || metaWithDateTime) && updateIni)
+            {
+                //ini should never contain additional meta, so update without it
+                BuildVersionString(flags & ~VFlags.MetaWithConfig & ~VFlags.MetaWithDateTime);
+                updateIni = false;
+            }
 
-            int major, minor, patch, pre;
-            if (!int.TryParse(textBoxMajor.Text, out major)) major = 1;
-            if (!int.TryParse(textBoxMinor.Text, out minor)) minor = 0;
-            if (string.IsNullOrWhiteSpace(textBoxPatch.Text)) patch = -1; else if (!int.TryParse(textBoxPatch.Text, out patch)) patch = 0;
-			if (string.IsNullOrWhiteSpace(textBoxPre.Text)) pre = -1; else if (!int.TryParse(textBoxPre.Text, out pre)) pre = -1;
+            int patch;
+            if (!int.TryParse(textBoxMajor.Text, out int major))
+            {
+                major = 1;
+            }
+
+            if (!int.TryParse(textBoxMinor.Text, out int minor))
+            {
+                minor = 0;
+            }
+
+            if (string.IsNullOrWhiteSpace(textBoxPatch.Text))
+            {
+                patch = -1;
+            }
+            else if (!int.TryParse(textBoxPatch.Text, out patch))
+            {
+                patch = 0;
+            }
+
             StringBuilder sb = new StringBuilder();
             sb.Append(major); sb.Append('.'); sb.Append(minor);
             if (patch > -1) { sb.Append('.'); sb.Append(patch); }
-            string meta = GetMeta(withConfig);
+            string meta = GetMeta(metaWithConfig, metaWithDateTime, version2);
             if (!version2)
             {
-                if (pre > 0 || !string.IsNullOrWhiteSpace(meta))
+                if (!string.IsNullOrWhiteSpace(meta))
                 {
                     string s = $"{meta}";
-                    if (pre > 0) s += "-" + pre.ToString();
                     s = s.Split(".-+".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Join("-");
                     sb.Append('-');
                     sb.Append(s);
@@ -98,49 +136,57 @@ namespace csPrepareRelease
             {
                 if (!string.IsNullOrWhiteSpace(meta))
                 {
-                    if (!meta.StartsWith("-") && !meta.StartsWith("+")) sb.Append('-');
+                    if (!meta.StartsWith("-") && !meta.StartsWith("+"))
+                    {
+                        sb.Append('-');
+                    }
+
                     sb.Append(meta);
-                }
-				if (pre > -1)
-                {
-                    sb.Append('.');
-                    sb.Append(pre);
                 }
             }
             if (updateIni)
             {
-                if (ini.HasSection("Version")) ini.RemoveSection("Version");
+                if (ini.HasSection("Version"))
+                {
+                    ini.RemoveSection("Version");
+                }
+
                 ini.WriteSetting("Version", "AddConfig", checkBoxAddConfig.Checked.ToString());
+                ini.WriteSetting("Version", "AddDateTime", checkBoxAddDateTime.Checked.ToString());
                 ini.WriteSetting("Version", "Major", major.ToString());
                 ini.WriteSetting("Version", "Minor", minor.ToString());
                 ini.WriteSetting("Version", "Patch", patch.ToString());
-                ini.WriteSetting("Version", "Pre", pre.ToString());
                 ini.WriteSetting("Version", "Meta", meta);
                 ini.WriteSetting("Version", "Type", comboBoxSemVer.SelectedIndex.ToString());
-				ini.WriteSetting("Version", "Full", sb.ToString());
-			}
+                ini.WriteSetting("Version", "Full", sb.ToString());
+            }
             return sb.ToString();
         }
 
-		void UpdateVersionString(bool updateIni)
-		{
-			if (updating) return;
-			VFlags flags = 0;
-			if (comboBoxSemVer.SelectedIndex == 1) { flags |= VFlags.Version2; }
-			if (updateIni) { flags |= VFlags.UpdateIni; }
-			if (checkBoxAddConfig.Checked) { flags |= VFlags.WithConfig; }
-			textBoxVersion.Text = BuildVersionString(flags);
-		}
+        void UpdateVersionString(bool updateIni)
+        {
+            if (updating)
+            {
+                return;
+            }
+
+            VFlags flags = 0;
+            if (comboBoxSemVer.SelectedIndex == 1) { flags |= VFlags.Version2; }
+            if (updateIni) { flags |= VFlags.UpdateIni; }
+            if (checkBoxAddConfig.Checked) { flags |= VFlags.MetaWithConfig; }
+            if (checkBoxAddDateTime.Checked) { flags |= VFlags.MetaWithDateTime; }
+            textBoxVersion.Text = BuildVersionString(flags);
+        }
 
         private void LoadVersonFile()
         {
             updating = true;
-            textBoxMajor.Text = ini.ReadSetting("Version", "Major");
-            textBoxMinor.Text = ini.ReadSetting("Version", "Minor");
-            textBoxPatch.Text = ini.ReadSetting("Version", "Patch");
-            textBoxPre.Text = ini.ReadSetting("Version", "Pre");
-            comboBoxMeta.Text = ini.ReadSetting("Version", "Meta");
+            textBoxMajor.Text = ini.ReadString("Version", "Major", "").Trim();
+            textBoxMinor.Text = ini.ReadString("Version", "Minor", "").Trim();
+            textBoxPatch.Text = ini.ReadString("Version", "Patch", "").Trim();
+            comboBoxMeta.Text = ini.ReadString("Version", "Meta", "").Trim();
             checkBoxAddConfig.Checked = ini.ReadBool("Version", "AddConfig", true);
+            checkBoxAddDateTime.Checked = ini.ReadBool("Version", "AddDateTime", true);
             try { comboBoxSemVer.SelectedIndex = ini.ReadInt32("Version", "Type", 0); } catch { comboBoxSemVer.SelectedIndex = 0; }
             updating = false;
             UpdateVersionString(false);
@@ -148,39 +194,26 @@ namespace csPrepareRelease
 
         private void buttonMajor_Click(object sender, EventArgs e)
         {
-            int i;
-            int.TryParse(textBoxMajor.Text, out i);
+            int.TryParse(textBoxMajor.Text, out int i);
             textBoxMajor.Text = (++i).ToString();
             textBoxMinor.Text = "0";
             textBoxPatch.Text = "0";
-            textBoxPre.Text = "";
             comboBoxMeta.Text = "";
         }
 
         private void buttonMinor_Click(object sender, EventArgs e)
         {
-            int i;
-            int.TryParse(textBoxMinor.Text, out i);
+            int.TryParse(textBoxMinor.Text, out int i);
             textBoxMinor.Text = (++i).ToString();
             textBoxPatch.Text = "0";
-            textBoxPre.Text = "";
             comboBoxMeta.Text = "";
         }
 
         private void buttonPatch_Click(object sender, EventArgs e)
         {
-            int i;
-            int.TryParse(textBoxPatch.Text, out i);
+            int.TryParse(textBoxPatch.Text, out int i);
             textBoxPatch.Text = (++i).ToString();
-            textBoxPre.Text = "";
             comboBoxMeta.Text = "";
-        }
-
-        private void buttonPre_Click(object sender, EventArgs e)
-        {
-            int i;
-            int.TryParse(textBoxPre.Text, out i);
-            textBoxPre.Text = (++i).ToString();
         }
 
         private void buttonReset_Click(object sender, EventArgs e)
@@ -194,7 +227,7 @@ namespace csPrepareRelease
             Enabled = false;
             try
             {
-                foreach (var p in Projects)
+                foreach (Project p in Projects)
                 {
                     listBoxProjects.SelectedItem = p.DirectoryPath;
                     Application.DoEvents();
@@ -216,9 +249,12 @@ namespace csPrepareRelease
         private void textBox_TextChanged(object sender, EventArgs e)
         {
             TextBox t = sender as TextBox;
-            if (t == null) return;
-            int i;
-            if (string.IsNullOrWhiteSpace(t.Text) || int.TryParse(t.Text, out i))
+            if (t == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(t.Text) || int.TryParse(t.Text, out int i))
             {
                 t.BackColor = SystemColors.Window;
                 t.ForeColor = SystemColors.WindowText;
@@ -234,8 +270,12 @@ namespace csPrepareRelease
         private void comboBoxMeta_TextChanged(object sender, EventArgs e)
         {
             ComboBox c = sender as ComboBox;
-            if (c == null) return;
-            if (GetMeta(false) == comboBoxMeta.Text)
+            if (c == null)
+            {
+                return;
+            }
+
+            if (GetMeta(false, false, comboBoxSemVer.SelectedIndex == 1) == comboBoxMeta.Text)
             {
                 c.BackColor = SystemColors.Window;
                 c.ForeColor = SystemColors.WindowText;
@@ -250,7 +290,7 @@ namespace csPrepareRelease
 
         private void buttonSolution_Click(object sender, EventArgs e)
         {
-            using (var dialog = new OpenFileDialog()
+            using (OpenFileDialog dialog = new OpenFileDialog()
             {
                 CheckFileExists = true,
                 DefaultExt = ".sln",
@@ -270,7 +310,7 @@ namespace csPrepareRelease
             }
         }
 
-        private void checkBoxAddConfig_CheckedChanged(object sender, EventArgs e)
+        private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
             UpdateVersionString(false);
         }

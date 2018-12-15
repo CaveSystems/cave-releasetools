@@ -5,9 +5,7 @@ using System.Text.RegularExpressions;
 using Cave;
 using Cave.Console;
 using Cave.FileSystem;
-using Cave.IO;
 using Cave.Net;
-using Cave.Text;
 
 namespace csPublish
 {
@@ -34,8 +32,12 @@ namespace csPublish
                 Help();
                 return;
             }
-			string configFileName = arguments.Parameters.Count == 0 ? "publish.ini" : arguments.Parameters[0];
-			if (!File.Exists(configFileName)) throw new FileNotFoundException(string.Format("File {0} cannot be found!", configFileName), configFileName);
+            string configFileName = arguments.Parameters.Count == 0 ? "publish.ini" : arguments.Parameters[0];
+            if (!File.Exists(configFileName))
+            {
+                throw new FileNotFoundException(string.Format("File {0} cannot be found!", configFileName), configFileName);
+            }
+
             Ini config = new Ini(configFileName);
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Path.GetFullPath(config.Name)));
             if (arguments.IsOptionPresent("root"))
@@ -55,48 +57,56 @@ namespace csPublish
 
         private void Publish(Ini config)
         {
-			LoadIncludes(config);
-            var files = Directory.GetFiles(".", "*", SearchOption.AllDirectories);
-            foreach (var section in config.GetSectionNames())
+            LoadIncludes(config);
+            string[] files = Directory.GetFiles(".", "*", SearchOption.AllDirectories);
+            foreach (string section in config.GetSectionNames())
             {
-				if (!section.ToLower().Trim().StartsWith("publish:")) continue;
+                if (!section.ToLower().Trim().StartsWith("publish:"))
+                {
+                    continue;
+                }
+
                 Publish(config, section, files);
             }
         }
 
-		private void LoadIncludes(Ini config)
-		{
-			{ // check version
-				var ver = new Version(config.ReadSetting("csPublish", "Version"));
-				if (LatestVersion.VersionIsNewer(ver, AssemblyVersionInfo.Program.AssemblyVersion))
-				{
-					throw new Exception("Newer csPublish version required!");
-				}
-			}
+        private void LoadIncludes(Ini config)
+        {
+            { // check version
+                Version ver = new Version(config.ReadSetting("csPublish", "Version"));
+                if (LatestVersion.VersionIsNewer(ver, AssemblyVersionInfo.Program.AssemblyVersion))
+                {
+                    throw new Exception("Newer csPublish version required!");
+                }
+            }
 
-			var includes = config.ReadSection("include", true);
-			if (includes.Length > 0)
-			{
-				config.RemoveSection("include");
-				foreach (var inc in includes)
-				{
-					var sub = new Ini(inc);
-					LoadIncludes(sub);
-					foreach (var section in sub.GetSectionNames())
-					{
-						if (config.HasSection(section)) throw new NotSupportedException(string.Format("Main configuration and included {0} contains a section with the name {1}.", Path.GetFileName(sub.Name), section));
-						config.WriteSection(section, sub.ReadSection(section));
-					}
-				}
-			}
-		}
+            string[] includes = config.ReadSection("include", true);
+            if (includes.Length > 0)
+            {
+                config.RemoveSection("include");
+                foreach (string inc in includes)
+                {
+                    Ini sub = new Ini(inc);
+                    LoadIncludes(sub);
+                    foreach (string section in sub.GetSectionNames())
+                    {
+                        if (config.HasSection(section))
+                        {
+                            throw new NotSupportedException(string.Format("Main configuration and included {0} contains a section with the name {1}.", Path.GetFileName(sub.Name), section));
+                        }
 
-		private void Publish(Ini config, string sectionName, string[] files)
-		{
-			string source = config.ReadSetting(sectionName, "Source");
-			Regex regex = CreateRegex(source);
-			SystemConsole.WriteLine("<yellow>{0}", sectionName);
-            foreach(string file in files)
+                        config.WriteSection(section, sub.ReadSection(section));
+                    }
+                }
+            }
+        }
+
+        private void Publish(Ini config, string sectionName, string[] files)
+        {
+            string source = config.ReadSetting(sectionName, "Source");
+            Regex regex = CreateRegex(source);
+            SystemConsole.WriteLine("<yellow>{0}", sectionName);
+            foreach (string file in files)
             {
                 string fileName = file.Replace('\\', '/');
                 if (regex.IsMatch(fileName))
@@ -108,67 +118,73 @@ namespace csPublish
 
         private void PublishFile(Ini config, string sectionName, string file)
         {
-            var target = config.ReadSetting(sectionName, "target");
+            string target = config.ReadSetting(sectionName, "target");
             switch (target?.ToLower().BeforeFirst(':'))
             {
                 case "globalfolder": PublishFileToFolder(config, sectionName, file, true); break;
                 case "projectfolder": PublishFileToFolder(config, sectionName, file, false); break;
-				case "ftp": PublishFileToFtp(config, sectionName, file, target); break;
-				default: throw new NotSupportedException(string.Format("Unknown target {0}", target));
-			}
+                case "ftp": PublishFileToFtp(config, sectionName, file, target); break;
+                default: throw new NotSupportedException(string.Format("Unknown target {0}", target));
+            }
         }
 
-		private void PublishFileToFtp(Ini config, string sectionName, string file, string target)
-		{
-			var con = new FtpConnection();
-			con.EnableSSL = config.ReadBool(target, "ssl", true);
-			ConnectionString connectionString = config.ReadSetting(target, "Target");
+        private void PublishFileToFtp(Ini config, string sectionName, string file, string target)
+        {
+            FtpConnection con = new FtpConnection
+            {
+                EnableSSL = config.ReadBool(target, "ssl", true)
+            };
+            ConnectionString connectionString = config.ReadSetting(target, "Target");
 
-			string user = config.ReadSetting(target, "Username");
-			if (!string.IsNullOrEmpty(user))
-			{
-				connectionString.UserName = user;
-			}
+            string user = config.ReadSetting(target, "Username");
+            if (!string.IsNullOrEmpty(user))
+            {
+                connectionString.UserName = user;
+            }
 
-			string pass = config.ReadSetting(target, "Password");
-			if (!string.IsNullOrEmpty(pass))
-			{
-				connectionString.Password = pass;
-			}
+            string pass = config.ReadSetting(target, "Password");
+            if (!string.IsNullOrEmpty(pass))
+            {
+                connectionString.Password = pass;
+            }
 
-			connectionString.Location = FileSystem.Combine('/', config.ReadSetting(target, "Path"), Path.GetFileName(file));
-			SystemConsole.Write("<cyan>Upload<default>: {0} -> <cyan>{1}<default> ..", file, connectionString);
-			con.Upload(connectionString, File.ReadAllBytes(file));
-			SystemConsole.WriteLine(" <green>ok");
+            connectionString.Location = FileSystem.Combine('/', config.ReadSetting(target, "Path"), Path.GetFileName(file));
+            SystemConsole.Write("<cyan>Upload<default>: {0} -> <cyan>{1}<default> ..", file, connectionString);
+            con.Upload(connectionString, File.ReadAllBytes(file));
+            SystemConsole.WriteLine(" <green>ok");
 
-			bool move = config.ReadBool(sectionName, "move", false) | config.ReadBool(sectionName, "delete", false);
-			SystemConsole.Write("<red>Delete<default>: {0} ..", file);
-			File.Delete(file);
-			SystemConsole.WriteLine(" <green>ok");
-		}
+            bool move = config.ReadBool(sectionName, "move", false) | config.ReadBool(sectionName, "delete", false);
+            SystemConsole.Write("<red>Delete<default>: {0} ..", file);
+            File.Delete(file);
+            SystemConsole.WriteLine(" <green>ok");
+        }
 
-		private void PublishFileToFolder(Ini config, string sectionName, string file, bool global)
+        private void PublishFileToFolder(Ini config, string sectionName, string file, bool global)
         {
             string folder = config.ReadSetting(sectionName, "Folder");
-            if (!global) folder = FileSystem.Combine(".", folder.TrimStart('/', '\\'));
+            if (!global)
+            {
+                folder = FileSystem.Combine(".", folder.TrimStart('/', '\\'));
+            }
+
             Directory.CreateDirectory(folder);
             bool move = config.ReadBool(sectionName, "move", false) | config.ReadBool(sectionName, "delete", false);
             string target = FileSystem.Combine(folder, Path.GetFileName(file));
             if (move)
             {
-				if (File.Exists(target))
-				{
-					SystemConsole.WriteLine("<red>Delete<default>: {0} ..", file);
-					File.Delete(file);
-					SystemConsole.WriteLine(" <green>ok");
-				}
-				else
-				{
-					SystemConsole.WriteLine("<cyan>Move<default>: {0} -> <cyan>{1}<default> ..", file, target);
-					File.Copy(file, target);
-					File.Delete(file);
-					SystemConsole.WriteLine(" <green>ok");
-				}
+                if (File.Exists(target))
+                {
+                    SystemConsole.WriteLine("<red>Delete<default>: {0} ..", file);
+                    File.Delete(file);
+                    SystemConsole.WriteLine(" <green>ok");
+                }
+                else
+                {
+                    SystemConsole.WriteLine("<cyan>Move<default>: {0} -> <cyan>{1}<default> ..", file, target);
+                    File.Copy(file, target);
+                    File.Delete(file);
+                    SystemConsole.WriteLine(" <green>ok");
+                }
             }
             else
             {
@@ -180,8 +196,8 @@ namespace csPublish
                 {
                     SystemConsole.WriteLine("<cyan>Copy<default>: {0} -> <cyan>{1}<default> ..", file, target);
                     File.Copy(file, target);
-					SystemConsole.WriteLine(" <green>ok");
-				}
+                    SystemConsole.WriteLine(" <green>ok");
+                }
             }
         }
 
@@ -201,7 +217,11 @@ namespace csPublish
                         lastWasWildcard = false;
                         continue;
                     case '*':
-                        if (lastWasWildcard) continue;
+                        if (lastWasWildcard)
+                        {
+                            continue;
+                        }
+
                         lastWasWildcard = true;
                         sb.Append(".*");
                         continue;
@@ -209,7 +229,7 @@ namespace csPublish
                         sb.Append(".");
                         lastWasWildcard = false;
                         continue;
-                    case ' ':                    
+                    case ' ':
                     case '%':
                     case '+':
                     case '_':
@@ -230,7 +250,7 @@ namespace csPublish
                 lastWasWildcard = false;
             }
             sb.Append('$');
-            var s = sb.ToString();
+            string s = sb.ToString();
             return new Regex(s, RegexOptions.IgnoreCase);
         }
     }

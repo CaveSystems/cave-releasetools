@@ -1,13 +1,11 @@
-﻿using Cave;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Cave;
 using Cave.Collections;
 using Cave.Console;
 using Cave.FileSystem;
-using Cave.IO;
-using Cave.Text;
 using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace csObfuscate
 {
@@ -59,9 +57,13 @@ namespace csObfuscate
 
         static bool FindProgramUnix(string name, string description, out string command)
         {
-            if (m_Cache.TryGetValue(name, out command)) return true;
-			IniReader reader = IniReader.FromLocation(Cave.IO.RootLocation.LocalUserConfig);
-			command = reader.ReadSetting("Software", name);
+            if (m_Cache.TryGetValue(name, out command))
+            {
+                return true;
+            }
+
+            IniReader reader = IniReader.FromLocation(RootLocation.LocalUserConfig);
+            command = reader.ReadSetting("Software", name);
             if (command != null && File.Exists(command))
             {
                 if (!m_Arguments.IsOptionPresent("reset-toolchain"))
@@ -74,7 +76,7 @@ namespace csObfuscate
             SystemConsole.WriteLine("\n<yellow>Warning:<default> Build tool <yellow>{0}<default> not set, searching...", description);
 
             ProcessResult result = ProcessRunner.Run("whereis", name);
-            if (result.ExitCode != 0) 
+            if (result.ExitCode != 0)
             {
                 SystemConsole.WriteLine("<red>Cannot find program {0} with whereis!", name);
                 SystemConsole.WriteLine(result.Combined);
@@ -100,14 +102,21 @@ namespace csObfuscate
 
         static bool FindProgramWindows(string name, string description, out string command)
         {
-			try
-			{
-				command = FileSystem.Combine(FileSystem.ProgramDirectory, name + ".exe");
-				if (File.Exists(command)) return true;
-			}
-			catch { }
+            try
+            {
+                command = FileSystem.Combine(FileSystem.ProgramDirectory, name + ".exe");
+                if (File.Exists(command))
+                {
+                    return true;
+                }
+            }
+            catch { }
 
-			if (m_Cache.TryGetValue(name, out command)) return true;
+            if (m_Cache.TryGetValue(name, out command))
+            {
+                return true;
+            }
+
             using (RegistryKey key = Registry.CurrentUser.CreateSubKey(@"Software\CaveSystems\" + name + "\\" + Environment.MachineName))
             {
                 command = key.GetValue("Command") as string;
@@ -133,7 +142,7 @@ namespace csObfuscate
                         SystemConsole.WriteLine("<yellow>Warning:<default> Directory <red>{0}<default> (set at PATH variable) does not exist!", dir);
                         continue;
                     }
-                    foreach(string prog in Directory.GetFiles(dir, "*.exe"))
+                    foreach (string prog in Directory.GetFiles(dir, "*.exe"))
                     {
                         if (string.Equals(Path.GetFileName(prog), name, comparison))
                         {
@@ -148,8 +157,10 @@ namespace csObfuscate
 
                 if (files.Count == 0)
                 {
-                    List<FileFinder> finders = new List<FileFinder>();
-                    finders.Add(new FileFinder(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "*", name + ".*"));
+                    List<FileFinder> finders = new List<FileFinder>
+                    {
+                        new FileFinder(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "*", name + ".*")
+                    };
                     try { finders.Add(new FileFinder(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "*", name + ".*")); } catch { }
 
                     foreach (FileFinder finder in finders)
@@ -179,9 +190,16 @@ namespace csObfuscate
 
         static void Finder_FoundFile(object sender, FileItemEventArgs e)
         {
-            if (e.File == null) return;
+            if (e.File == null)
+            {
+                return;
+            }
+
             ProcessResult result = ProcessRunner.Run(e.File, "");
-            if (result.StartException == null) files.Add(e.File);
+            if (result.StartException == null)
+            {
+                files.Add(e.File);
+            }
         }
 
         /// <summary>Searches for a program with the specified filename and runs it with the specified arguments.</summary>
@@ -197,10 +215,18 @@ namespace csObfuscate
             switch (Platform.Type)
             {
                 case PlatformType.Windows:
-                    if (!FindProgramWindows(filename, description, out command)) command = filename;
+                    if (!FindProgramWindows(filename, description, out command))
+                    {
+                        command = filename;
+                    }
+
                     break;
                 case PlatformType.Linux:
-                    if (!FindProgramUnix(filename, description, out command)) command = filename;
+                    if (!FindProgramUnix(filename, description, out command))
+                    {
+                        command = filename;
+                    }
+
                     break;
                 default:
                     throw new NotImplementedException(string.Format("Platform {0} not implemented!", Platform.Type));
