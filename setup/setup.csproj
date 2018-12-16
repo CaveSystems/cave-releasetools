@@ -107,8 +107,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <PropertyGroup>
-    <PostBuildEvent>csInnoSetup --$(ConfigurationName) $(ProjectDir)Setup.$(ConfigurationName).iss</PostBuildEvent>
-    <ApplicationIcon />
-  </PropertyGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="csInnoSetup --$(ConfigurationName) $(ProjectDir)Setup.$(ConfigurationName).iss" />
+  </Target>
 </Project>
