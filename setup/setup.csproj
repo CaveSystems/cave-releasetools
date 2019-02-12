@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net471</TargetFramework>
+    <TargetFramework>net47</TargetFramework>
     <OutputType>Library</OutputType>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <TargetFrameworkProfile />
-    <AssemblyVersion>1.0.2</AssemblyVersion>
-    <FileVersion>2018.1215.1125.1848</FileVersion>
+    <AssemblyVersion>1.0.3</AssemblyVersion>
+    <FileVersion>2019.212.2046.201</FileVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Cave.Tools.snk</AssemblyOriginatorKeyFile>
     <SignManifests>true</SignManifests>
@@ -57,11 +57,11 @@
     <PackageReference Include="Cave.Collections" Version="1.0.1" />
     <PackageReference Include="Cave.Compression" Version="1.0.0" />
     <PackageReference Include="Cave.Console" Version="1.0.0" />
-    <PackageReference Include="Cave.FileSystem" Version="1.0.0" />
-    <PackageReference Include="Cave.IO" Version="1.0.0" />
-    <PackageReference Include="Cave.Net" Version="1.0.0" />
-    <PackageReference Include="Cave.Process" Version="1.0.0" />
-    <PackageReference Include="Cave.Settings" Version="1.0.1" />
+    <PackageReference Include="Cave.FileSystem" Version="1.1.0" />
+    <PackageReference Include="Cave.IO" Version="1.0.2" />
+    <PackageReference Include="Cave.Net" Version="1.0.2" />
+    <PackageReference Include="Cave.Process" Version="1.0.1" />
+    <PackageReference Include="Cave.Settings" Version="1.0.2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\csDebber\csDebber.csproj">

@@ -1,7 +1,7 @@
 #define PACKAGE "cave-tools"
 #define NAME "CaveSystems Tools"
 #define COMPANY "CaveSystems GmbH"
-#define VERSION "1.0.2"
+#define VERSION "1.0.3"
 
 [Setup]
 AppId={#PACKAGE}
@@ -26,7 +26,8 @@ AllowUNCPath=no
 DisableReadyMemo=yes
 DisableReadyPage=yes
 ArchitecturesInstallIn64BitMode=x64
-SignTool=default /v /i "COMODO" /n "CaveSystems GmbH" /a /t http://timestamp.verisign.com/scripts/timstamp.dll
+;Tools->Configure Sign Tools->add->default->cssign $p $f
+SignTool=default sign /v /i "COMODO" /n "CaveSystems GmbH" /a /t http://timestamp.verisign.com/scripts/timstamp.dll
 UninstallDisplayIcon={app}\setup.ico
 ChangesEnvironment=yes
 
@@ -61,12 +62,12 @@ Source: "changes.txt"; DestDir: "{app}"; Flags: replacesameversion
 
 Source: "Obfuscar.Console.exe"; DestDir: "{app}"; Flags: replacesameversion
 
-Source: "bin\Release\net471\*.dll"; DestDir: "{app}"; Flags: replacesameversion
-Source: "bin\Release\net471\cs*.exe*"; DestDir: "{app}"; Flags: replacesameversion
+Source: "bin\Release\net47\*.dll"; DestDir: "{app}"; Flags: replacesameversion
+Source: "bin\Release\net47\cs*.exe*"; DestDir: "{app}"; Flags: replacesameversion
 
 [Icons]
-Name: "{group}\{cm:UninstallProgram,{#NAME} {#VERSION}}"; Filename: "{uninstallexe}"
-Name: "{group}\{cm:ProgramOnTheWeb,{#COMPANY}}"; Filename: "http://www.cavesystems.de"
+;Name: "{group}\{cm:UninstallProgram,{#NAME} {#VERSION}}"; Filename: "{uninstallexe}"
+;Name: "{group}\{cm:ProgramOnTheWeb,{#COMPANY}}"; Filename: "http://www.cavesystems.de"
 
 [Code]
 function GetUninstallString(): String;

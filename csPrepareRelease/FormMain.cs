@@ -8,7 +8,6 @@ using System.Text;
 using System.Windows.Forms;
 using Cave;
 using Cave.Console;
-using Cave.FileSystem;
 using Microsoft.Build.Evaluation;
 
 namespace csPrepareRelease

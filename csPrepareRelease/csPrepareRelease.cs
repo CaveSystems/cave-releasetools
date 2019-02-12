@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Cave;
 using Cave.Console;
-using Cave.FileSystem;
 using Microsoft.Build.Evaluation;
 
 namespace csPrepareRelease
@@ -241,6 +240,7 @@ namespace csPrepareRelease
                                     SystemConsole.WriteLine(ex.ToXT());
                                 }
                             }
+                            throw;
                             MessageBox.Show(ex.ToString());
                         }
                     }

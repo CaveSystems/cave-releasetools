@@ -4,7 +4,6 @@ using System.IO;
 using Cave;
 using Cave.Collections;
 using Cave.Console;
-using Cave.FileSystem;
 using Microsoft.Win32;
 
 namespace csObfuscate
