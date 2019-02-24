@@ -27,13 +27,16 @@ namespace csPrepareRelease
         [STAThread]
         static void Main(string[] args)
         {
-            new csPrepareRelease().Run(Arguments.FromArray(args));
+            new csPrepareRelease().Run(args);
         }
 
-        private void Run(Arguments arguments)
+        private void Run(string[] args)
         {
+			bool waitOnExit = Debugger.IsAttached;
             try
             {
+				Arguments arguments = Arguments.FromArray(args);
+				waitOnExit |= arguments.IsOptionPresent("wait");
                 if (arguments.IsHelpOptionFound()) { Help(); return; }
                 if (arguments.IsOptionPresent("increment") || arguments.IsOptionPresent("stable"))
                 {
@@ -58,7 +61,7 @@ namespace csPrepareRelease
             }
             finally
             {
-                if (IsConsoleMode && (Debugger.IsAttached || arguments.IsOptionPresent("wait")))
+                if (waitOnExit)
                 {
                     SystemConsole.WriteLine("--- press <yellow>enter<default> to exit ---");
                     SystemConsole.ReadLine();
@@ -71,14 +74,14 @@ namespace csPrepareRelease
             SystemConsole.WriteLine(
                 Banner +
                 "\n" +
-                "csPrepareRelease [<cyan>--increment<default>] <magenta>solution.sln" +
-                "Prepares a visual studio solution for release patching csproj, AssemblyInfo, nuspec and setup files." +
+                "csPrepareRelease [<cyan>--increment<default>] <magenta>solution.sln\n" +
+                "Prepares a visual studio solution for release patching csproj, AssemblyInfo, nuspec and setup files.\n" +
                 "\n" +
-                "  <cyan>--stable[=patch]<default>: clear meta and use only major.minor.patch." +
-                "  <cyan>--increment<default>:      automatically patch the solution to the next patch version." +
-                "  <cyan>--debug<default>:          set loglevel to debug." +
-                "  <cyan>--verbose<default>:        set loglevel to verbose." +
-                "  <cyan>--wait<default>:           wait for console key after execution." +
+                "  <cyan>--stable[=patch]<default>: clear meta and use only major.minor.patch.\n" +
+                "  <cyan>--increment<default>:      automatically patch the solution to the next patch version.\n" +
+                "  <cyan>--debug<default>:          set loglevel to debug.\n" +
+                "  <cyan>--verbose<default>:        set loglevel to verbose.\n" +
+                "  <cyan>--wait<default>:           wait for console key after execution.\n" +
                 "\n");
         }
 
@@ -200,9 +203,14 @@ namespace csPrepareRelease
         private List<Project> LoadProjects(Arguments args)
         {
             List<Project> projects = new List<Project>();
-            foreach (string p in args.Parameters)
+            var solutionFileNames = args.Parameters.ToArray();
+            if (solutionFileNames.Length == 0)
             {
-                string file = Path.GetFullPath(FileSystem.Combine(".", p));
+                solutionFileNames = Directory.GetFiles(".", "*.sln");
+            }
+            foreach (string solutionFileName in solutionFileNames)
+            {
+                string file = Path.GetFullPath(FileSystem.Combine(".", solutionFileName));
                 SystemConsole.WriteLine("Loading {0}", file);
                 if (File.Exists(file))
                 {

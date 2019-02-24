@@ -27,7 +27,7 @@ DisableReadyMemo=yes
 DisableReadyPage=yes
 ArchitecturesInstallIn64BitMode=x64
 ;Tools->Configure Sign Tools->add->default->cssign $p $f
-SignTool=default sign /v /i "COMODO" /n "CaveSystems GmbH" /a /t http://timestamp.verisign.com/scripts/timstamp.dll
+;SignTool=default sign /v /i "COMODO" /n "CaveSystems GmbH" /a /t http://timestamp.verisign.com/scripts/timstamp.dll
 UninstallDisplayIcon={app}\setup.ico
 ChangesEnvironment=yes
 
@@ -62,7 +62,7 @@ Source: "changes.txt"; DestDir: "{app}"; Flags: replacesameversion
 
 Source: "Obfuscar.Console.exe"; DestDir: "{app}"; Flags: replacesameversion
 
-Source: "bin\Release\net47\*.*"; DestDir: "{app}"; Flags: replacesameversion
+Source: "bin\Debug\net47\*.*"; DestDir: "{app}"; Flags: replacesameversion
 
 [Icons]
 ;Name: "{group}\{cm:UninstallProgram,{#NAME} {#VERSION}}"; Filename: "{uninstallexe}"

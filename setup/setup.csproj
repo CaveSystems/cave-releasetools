@@ -4,10 +4,10 @@
     <OutputType>Library</OutputType>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <TargetFrameworkProfile />
-    <AssemblyVersion>1.0.3</AssemblyVersion>
-    <FileVersion>2019.212.2046.201</FileVersion>
+    <AssemblyVersion>1.0.4</AssemblyVersion>
+    <FileVersion>2019.224.1435.664</FileVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Cave.Tools.snk</AssemblyOriginatorKeyFile>
     <SignManifests>true</SignManifests>
@@ -57,6 +57,7 @@
     <PackageReference Include="Cave.Collections" Version="1.0.1" />
     <PackageReference Include="Cave.Compression" Version="1.0.0" />
     <PackageReference Include="Cave.Console" Version="1.0.0" />
+    <PackageReference Include="Cave.Extensions" Version="1.0.4" />
     <PackageReference Include="Cave.FileSystem" Version="1.1.0" />
     <PackageReference Include="Cave.IO" Version="1.0.2" />
     <PackageReference Include="Cave.Net" Version="1.0.2" />
@@ -108,6 +109,6 @@
     </None>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="csInnoSetup --$(ConfigurationName) $(ProjectDir)Setup.$(ConfigurationName).iss" />
+    <Exec Command="$(TargetDir)csInnoSetup $(ProjectDir)Setup.$(ConfigurationName).iss" />
   </Target>
 </Project>

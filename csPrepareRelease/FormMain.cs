@@ -30,6 +30,7 @@ namespace csPrepareRelease
 
         private void Init()
         {
+            if (string.IsNullOrEmpty(textBoxSolution.Text)) return;
             string fileName = Path.GetFullPath(textBoxSolution.Text + ".ver");
             FileSystem.TouchFile(fileName);
             ini = new Ini(fileName);
@@ -291,6 +292,7 @@ namespace csPrepareRelease
         {
             using (OpenFileDialog dialog = new OpenFileDialog()
             {
+                InitialDirectory = Directory.GetCurrentDirectory(),
                 CheckFileExists = true,
                 DefaultExt = ".sln",
                 FileName = textBoxSolution.Text,
